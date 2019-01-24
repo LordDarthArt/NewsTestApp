@@ -18,7 +18,7 @@ class Item {
     internal lateinit var rubric : List<Rubric>
     @SerializedName("tags")
     @Expose
-    internal lateinit var tags : List<Tags>
+    internal lateinit var tags : List<List<Tags>>
     @SerializedName("title_image")
     @Expose
     internal lateinit var title_image : List<TitlePic>
