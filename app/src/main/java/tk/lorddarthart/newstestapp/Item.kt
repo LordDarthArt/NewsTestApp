@@ -2,24 +2,25 @@ package tk.lorddarthart.newstestapp
 
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
+import java.util.*
 
 class Item {
     @SerializedName("type")
     @Expose
-    internal lateinit var type : String
+    internal var type : String = ""
     @SerializedName("info")
     @Expose
-    internal lateinit var info : List<Info>
+    internal var info : Info = Info()
     @SerializedName("links")
     @Expose
-    internal lateinit var links : List<Links>
+    internal var links : Links = Links()
     @SerializedName("rubric")
     @Expose
-    internal lateinit var rubric : List<Rubric>
+    internal var rubric : Rubric = Rubric()
     @SerializedName("tags")
     @Expose
-    internal lateinit var tags : List<List<Tags>>
+    internal var tags : List<Tags> = LinkedList()
     @SerializedName("title_image")
     @Expose
-    internal lateinit var title_image : List<TitlePic>
+    internal var title_image : TitlePic? = TitlePic()
 }

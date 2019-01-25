@@ -2,28 +2,25 @@ package tk.lorddarthart.newstestapp
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.BitmapFactory
-import android.os.AsyncTask
+import android.support.constraint.ConstraintLayout
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
-import java.net.URL
-import java.util.concurrent.ExecutionException
+import com.koushikdutta.ion.Ion
+import java.text.SimpleDateFormat
 
-class RecyclerViewAdapter: RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder>() {
-    internal lateinit var context: Context
-    internal lateinit var listItems: List<Item>
-    internal lateinit var view: View
-    internal lateinit var viewHolder: ViewHolder
-    internal lateinit var onItemTouchListener: OnItemTouchListener
+class RecyclerViewAdapter() : RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder>() {
+    private lateinit var context: Context
+    private lateinit var listItems: List<Item>
+    private lateinit var view: View
+    private lateinit var viewHolder: ViewHolder
 
-    init {
+    constructor(context: Context, listItems: List<Item>) : this() {
         this.context = context
         this.listItems = listItems
-        this.onItemTouchListener = onItemTouchListener
     }
 
     override fun onCreateViewHolder(p0: ViewGroup, p1: Int): RecyclerViewAdapter.ViewHolder {
@@ -36,63 +33,37 @@ class RecyclerViewAdapter: RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder>(
        return listItems.size
     }
 
+    @SuppressLint("SimpleDateFormat", "SetTextI18n")
     override fun onBindViewHolder(p0: RecyclerViewAdapter.ViewHolder, p1: Int) {
         val item = listItems[p1]
-        p0.tvTitle.text = item.info[0].title
-        p0.tvDesc.text = item.info[0].rightcol
-        try {
-            UploadImageToItem(item.title_image[0].url, p0).execute().get()
-        } catch (e: ExecutionException) {
-            e.printStackTrace()
-        } catch (e: InterruptedException) {
-            e.printStackTrace()
+        p0.tvTitle.text = item.info.title
+        p0.tvDesc.text = item.info.rightcol
+        val sdf = SimpleDateFormat("dd-MM-yyyy HH:mm")
+        p0.tvDate.text = "Добавлено: "+sdf.format(item.info.modified!! *1000)
+        p0.tvRubric.text = "Рубрика: "+item.rubric.title
+        Ion.with(context)
+            .load(item.title_image!!.url)
+            .withBitmap()
+            .placeholder(R.drawable.loading)
+            .error(R.drawable.no_image_available)
+            .intoImageView(p0.ivNewsPic)
+        if (item.title_image!!.credits != "") {
+            p0.tvPicDesc.text = item.title_image!!.credits
+        } else {
+            p0.constraintLayout.visibility = View.GONE
         }
 
     }
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
 
-        var tvTitle: TextView
-        var tvDesc: TextView
-        var ivNewsPic: ImageView
+        var tvTitle: TextView = itemView.findViewById(R.id.tvTitle)
+        var tvDesc: TextView = itemView.findViewById(R.id.tvDesc)
+        var tvDate: TextView = itemView.findViewById(R.id.tvDate)
+        var tvRubric: TextView = itemView.findViewById(R.id.tvRubric)
+        var ivNewsPic: ImageView = itemView.findViewById(R.id.ivPicc)
+        var tvPicDesc: TextView = itemView.findViewById(R.id.tvPicDesc)
+        var constraintLayout: ConstraintLayout = itemView.findViewById(R.id.darkenBG)
 
-        init {
-
-            tvTitle = itemView.findViewById(R.id.tvTitle)
-            tvDesc = itemView.findViewById(R.id.tvDesc)
-            ivNewsPic = itemView.findViewById(R.id.ivPic)
-
-            itemView.setOnClickListener { v -> onItemTouchListener?.onCardViewTap(v, layoutPosition) }
-        }
     }
-
-    @SuppressLint("StaticFieldLeak")
-    inner class UploadImageToItem internal constructor(
-        internal var urlString: String, internal var holder: ViewHolder
-    ) : AsyncTask<Void, Void, Void>() {
-
-        // Загрузка предоставленного к новости изображения отдельно от основного потока
-
-        override fun onPreExecute() {
-            super.onPreExecute()
-        }
-
-        override fun doInBackground(vararg voids: Void): Void? {
-            try {
-                val url = URL(urlString)
-                val bmp = BitmapFactory.decodeStream(url.openConnection().getInputStream())
-                holder.ivNewsPic.setImageBitmap(bmp)
-            } catch (e: Exception) {
-                holder.ivNewsPic.setImageDrawable(context.resources.getDrawable(R.drawable.no_image_available))
-                e.printStackTrace()
-            }
-
-            return null
-        }
-
-        override fun onPostExecute(aVoid: Void) {
-            super.onPostExecute(aVoid)
-        }
-    }
-
 }

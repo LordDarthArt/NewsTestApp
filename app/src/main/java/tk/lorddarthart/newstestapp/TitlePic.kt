@@ -6,8 +6,8 @@ import com.google.gson.annotations.SerializedName
 class TitlePic {
     @SerializedName("credits")
     @Expose
-    internal lateinit var credits: String
+    internal var credits: String = ""
     @SerializedName("url")
     @Expose
-    internal lateinit var url: String
+    internal var url: String = ""
 }

@@ -7,26 +7,22 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 class HttpServiceHelper {
     private lateinit var mInstance: HttpServiceHelper
-    private val BASE_URL = "api.lenta.ru"
-    private lateinit var mRetrofit: Retrofit
+    private val baseUrl = "https://api.lenta.ru"
+    private var mRetrofit: Retrofit
 
-    internal fun HttpServiceHelper(): HttpServiceHelper {
+    init {
         val interceptor = HttpLoggingInterceptor()
         interceptor.level = HttpLoggingInterceptor.Level.BODY
-
         OkHttpClient.Builder()
             .addInterceptor(interceptor)
-
-        Retrofit.Builder()
-            .baseUrl(BASE_URL)
+        mRetrofit = Retrofit.Builder()
+            .baseUrl(baseUrl)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-
-        return HttpServiceHelper()
     }
 
     fun getInstance(): HttpServiceHelper {
-        return mInstance
+        return HttpServiceHelper()
     }
 
     fun getJSONApi(): JSONPlaceHolderApi {

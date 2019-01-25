@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">NewsTestApp</string>
+    <string name="notification">Вывести в уведомления</string>
+    <string name="desc">Картинка, относящаяся к новости</string>
 </resources>
