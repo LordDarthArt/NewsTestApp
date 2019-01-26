@@ -1,14 +1,17 @@
 package tk.lorddarthart.newstestapp
 
 import android.annotation.SuppressLint
+import android.app.NotificationManager
 import android.content.Context
+import android.preference.PreferenceManager
 import android.support.constraint.ConstraintLayout
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.view.View
-import android.widget.ImageView
-import android.widget.TextView
+import android.view.animation.Animation
+import android.view.animation.ScaleAnimation
+import android.widget.*
 import com.koushikdutta.ion.Ion
 import java.text.SimpleDateFormat
 
@@ -17,10 +20,13 @@ class RecyclerViewAdapter() : RecyclerView.Adapter<RecyclerViewAdapter.ViewHolde
     private lateinit var listItems: List<Item>
     private lateinit var view: View
     private lateinit var viewHolder: ViewHolder
+    private lateinit var recyclerView: RecyclerView
+    private var notificationManager: NotificationManager? = null
 
-    constructor(context: Context, listItems: List<Item>) : this() {
+    constructor(context: Context, listItems: List<Item>, recyclerView: RecyclerView) : this() {
         this.context = context
         this.listItems = listItems
+        this.recyclerView = recyclerView
     }
 
     override fun onCreateViewHolder(p0: ViewGroup, p1: Int): RecyclerViewAdapter.ViewHolder {
@@ -30,17 +36,17 @@ class RecyclerViewAdapter() : RecyclerView.Adapter<RecyclerViewAdapter.ViewHolde
     }
 
     override fun getItemCount(): Int {
-       return listItems.size
+        return listItems.size
     }
 
-    @SuppressLint("SimpleDateFormat", "SetTextI18n")
+    @SuppressLint("SimpleDateFormat", "SetTextI18n", "CommitPrefEdits")
     override fun onBindViewHolder(p0: RecyclerViewAdapter.ViewHolder, p1: Int) {
         val item = listItems[p1]
         p0.tvTitle.text = item.info.title
         p0.tvDesc.text = item.info.rightcol
         val sdf = SimpleDateFormat("dd-MM-yyyy HH:mm")
-        p0.tvDate.text = "Добавлено: "+sdf.format(item.info.modified!! *1000)
-        p0.tvRubric.text = "Рубрика: "+item.rubric.title
+        p0.tvDate.text = "Добавлено: " + sdf.format(item.info.modified!! * 1000)
+        p0.tvRubric.text = "Рубрика: " + item.rubric.title
         Ion.with(context)
             .load(item.title_image!!.url)
             .withBitmap()
@@ -52,10 +58,21 @@ class RecyclerViewAdapter() : RecyclerView.Adapter<RecyclerViewAdapter.ViewHolde
         } else {
             p0.constraintLayout.visibility = View.GONE
         }
-
+        p0.checkBox.setOnCheckedChangeListener { _, _ ->
+            if (p0.checkBox.isChecked) {
+                val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context)
+                recyclerView.getChildAt(sharedPrefs.getInt("prevPoz", 0)).findViewById<CheckBox>(R.id.checkBox).isChecked = false
+                PushNotifications().getNotified(context, item.info.title, item.info.rightcol, p1)
+                sharedPrefs.edit().putInt("prevPoz", p1)
+                sharedPrefs.edit().apply()
+            } else {
+                notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                notificationManager!!.cancel(PushNotifications().uniqueId)
+            }
+        }
     }
 
-    inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
+    inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
         var tvTitle: TextView = itemView.findViewById(R.id.tvTitle)
         var tvDesc: TextView = itemView.findViewById(R.id.tvDesc)
@@ -64,6 +81,7 @@ class RecyclerViewAdapter() : RecyclerView.Adapter<RecyclerViewAdapter.ViewHolde
         var ivNewsPic: ImageView = itemView.findViewById(R.id.ivPicc)
         var tvPicDesc: TextView = itemView.findViewById(R.id.tvPicDesc)
         var constraintLayout: ConstraintLayout = itemView.findViewById(R.id.darkenBG)
+        var checkBox: CheckBox = itemView.findViewById(R.id.checkBox)
 
     }
 }
