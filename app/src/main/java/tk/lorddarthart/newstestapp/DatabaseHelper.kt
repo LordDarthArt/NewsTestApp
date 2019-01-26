@@ -42,7 +42,7 @@ open class DatabaseHelper : SQLiteOpenHelper, BaseColumns {
                 + TABLE_RUBRICS
                 + " (" + RUBRIC_ID + " integer not null primary key autoincrement, "
                 + RUBRIC_NAME + " text not null, "
-                + "UNIQUE(" + RUBRIC_NAME + ") ON CONFLICT IGNORE);")
+                + "UNIQUE(" + RUBRIC_NAME + ") ON CONFLICT REPLACE);")
 
         const val DATABASE_CREATE_NEWS_SCRIPT = ("create table "
                 + TABLE_NEWS
@@ -53,7 +53,7 @@ open class DatabaseHelper : SQLiteOpenHelper, BaseColumns {
                 + NEWS_DESC + " text not null, "
                 + NEWS_PIC + " text, "
                 + NEWS_PICDESC + " text, "
-                + "UNIQUE(" + NEWS_DATE + ") ON CONFLICT IGNORE);")
+                + "UNIQUE(" + NEWS_DATE + ") ON CONFLICT REPLACE);")
 
         fun addNews(
             mSqLiteDatabase: SQLiteDatabase,

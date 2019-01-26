@@ -17,6 +17,11 @@ import retrofit2.Callback
 import retrofit2.Response
 import java.io.IOException
 import java.util.*
+import android.text.TextUtils
+import android.content.Intent
+import android.widget.AbsListView
+import android.widget.CheckBox
+
 
 class MainActivity : AppCompatActivity() {
     private lateinit var databaseHelper: DatabaseHelper
@@ -34,6 +39,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        recyclerView = findViewById(R.id.recyclerView)
         view = window.decorView.rootView
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
         databaseHelper =
@@ -42,49 +48,12 @@ class MainActivity : AppCompatActivity() {
         val query: String =
             "SELECT " + DatabaseHelper.NEWS_ID + ", " + DatabaseHelper.NEWS_DATE + ", " + DatabaseHelper.NEWS_TITLE + ", " + DatabaseHelper.NEWS_DESC + ", " + DatabaseHelper.NEWS_RUBRIC + " , " + DatabaseHelper.NEWS_PIC + ", " + DatabaseHelper.NEWS_PICDESC + " FROM " + DatabaseHelper.TABLE_NEWS
         cursor = sqliteDatabase.rawQuery(query, Array(0) { "" })
-        recyclerView = findViewById(R.id.recyclerView)
-        linlayoutManager = LinearLayoutManager(this)
+        linlayoutManager = CenterZoomLayoutManager(this)
         recyclerView.layoutManager = linlayoutManager
         if (sharedPreferences.contains("rubrics")) {
 
         } else {
-            try { // Попытка получить данные
-                if (!ConnectivityChangeReciever().checkInternet()) { // Если соединение отсутствует, ошибка
-                    throw NetworkErrorException()
-                }
-                HttpServiceHelper().getInstance().getJSONApi().getNews()
-                    .enqueue(object:Callback<News> {
-
-                        override fun onResponse(call: Call<News>, response: Response<News>) {
-                            val news = response.body()
-                            if (news != null && news.item.isNotEmpty()) {
-                                for (i: Int in 0 until news.item.size) {
-                                    DatabaseHelper.addNews(sqliteDatabase, news.item[i].info.modified,
-                                        news.item[i].info.title, news.item[i].info.rightcol,
-                                        news.item[i].title_image!!.url, news.item[i].title_image!!.credits,
-                                        news.item[i].rubric.title)
-                                }
-                                recyclerViewAdapter = RecyclerViewAdapter(
-                                    applicationContext, news.item
-                                )
-                                recyclerView.adapter = recyclerViewAdapter
-                            } else {
-                                getCurrentNews()
-                            }
-                        }
-
-                        override fun onFailure(call: Call<News>, t: Throwable) {
-                            getCurrentNews()
-                            Snackbar.make(window.decorView.rootView, "Произошла ошибка сервера", Snackbar.LENGTH_LONG).show()
-                        }
-                    })
-            } catch (e: NetworkErrorException) {
-                getCurrentNews()
-                Snackbar.make(window.decorView.findViewById(android.R.id.content), "Произошла ошибка, проверьте соединение", Snackbar.LENGTH_LONG).show()
-            } catch (e: Exception) {
-                getCurrentNews()
-                e.printStackTrace()
-            }
+            getSomeNews()
         }
     }
 
@@ -119,11 +88,11 @@ class MainActivity : AppCompatActivity() {
             item.title_image!!.credits = cursor.getString(cursor.getColumnIndex(DatabaseHelper.NEWS_PICDESC))
             news.add(item)
         }
-        initializeAdapter()
+        initializeAdapter(news)
     }
 
-    private fun initializeAdapter() {
-        recyclerViewAdapter = RecyclerViewAdapter(applicationContext, news)
+    private fun initializeAdapter(news: List<Item>) {
+        recyclerViewAdapter = RecyclerViewAdapter(applicationContext, news, recyclerView)
         recyclerView.adapter = recyclerViewAdapter
     }
 
@@ -140,43 +109,7 @@ class MainActivity : AppCompatActivity() {
             } else {
                 if (state) {
                     snackBarNotifications.onInternetRestoreConstraintLayout(view)
-                    try { // Попытка получить данные
-                        if (!ConnectivityChangeReciever().checkInternet()) { // Если соединение отсутствует, ошибка
-                            throw NetworkErrorException()
-                        }
-                        HttpServiceHelper().getInstance().getJSONApi().getNews()
-                            .enqueue(object:Callback<News> {
-
-                                override fun onResponse(call: Call<News>, response: Response<News>) {
-                                    val news = response.body()
-                                    if (news != null && news.item.isNotEmpty()) {
-                                        for (i: Int in 0 until news.item.size) {
-                                            DatabaseHelper.addNews(sqliteDatabase, news.item[i].info.modified,
-                                                news.item[i].info.title, news.item[i].info.rightcol,
-                                                news.item[i].title_image!!.url, news.item[i].title_image!!.credits,
-                                                news.item[i].rubric.title)
-                                        }
-                                        recyclerViewAdapter = RecyclerViewAdapter(
-                                            applicationContext, news.item
-                                        )
-                                        recyclerView.adapter = recyclerViewAdapter
-                                    } else {
-                                        getCurrentNews()
-                                    }
-                                }
-
-                                override fun onFailure(call: Call<News>, t: Throwable) {
-                                    getCurrentNews()
-                                    Snackbar.make(window.decorView.rootView, "Произошла ошибка сервера", Snackbar.LENGTH_LONG).show()
-                                }
-                            })
-                    } catch (e: NetworkErrorException) {
-                        getCurrentNews()
-                        Snackbar.make(window.decorView.findViewById(android.R.id.content), "Произошла ошибка, проверьте соединение", Snackbar.LENGTH_LONG).show()
-                    } catch (e: Exception) {
-                        getCurrentNews()
-                        e.printStackTrace()
-                    }
+                    getSomeNews()
                     state = false
                 }
             }
@@ -195,6 +128,64 @@ class MainActivity : AppCompatActivity() {
             }
 
             return false
+        }
+    }
+
+    fun getSomeNews() {
+        try { // Попытка получить данные с сервера
+            if (!ConnectivityChangeReciever().checkInternet()) { // Если соединение отсутствует, ошибка
+                throw NetworkErrorException()
+            }
+            HttpServiceHelper().getInstance().getJSONApi().getNews()
+                .enqueue(object : Callback<News> {
+
+                    override fun onResponse(call: Call<News>, response: Response<News>) {
+                        val news = response.body()
+                        if (news != null && news.item.isNotEmpty()) {
+                            for (i: Int in 0 until news.item.size) {
+                                DatabaseHelper.addNews(
+                                    sqliteDatabase, news.item[i].info.modified,
+                                    news.item[i].info.title, news.item[i].info.rightcol,
+                                    news.item[i].title_image!!.url, news.item[i].title_image!!.credits,
+                                    news.item[i].rubric.title
+                                )
+                            }
+                            initializeAdapter(news.item)
+                            scrollToItem()
+                        } else {
+                            getCurrentNews()
+                            scrollToItem()
+                        }
+                    }
+
+                    override fun onFailure(call: Call<News>, t: Throwable) {
+                        getCurrentNews()
+                        scrollToItem()
+                        Snackbar.make(window.decorView.rootView, "Произошла ошибка сервера", Snackbar.LENGTH_LONG)
+                            .show()
+                    }
+                })
+        } catch (e: NetworkErrorException) {
+            getCurrentNews()
+            scrollToItem()
+            Snackbar.make(
+                window.decorView.findViewById(android.R.id.content),
+                "Произошла ошибка, проверьте соединение",
+                Snackbar.LENGTH_LONG
+            ).show()
+        } catch (e: Exception) {
+            getCurrentNews()
+            scrollToItem()
+            e.printStackTrace()
+        }
+    }
+
+    fun scrollToItem() {
+        // Скролл до нужного элемента
+        if (intent.getBooleanExtra("checked", false)) {
+            recyclerView.post { recyclerView.smoothScrollToPosition(intent.getIntExtra("position", 0)) }
+        } else {
+            recyclerView.post { recyclerView.scrollTo(0,2) }
         }
     }
 }
