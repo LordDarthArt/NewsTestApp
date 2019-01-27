@@ -2,6 +2,7 @@ package tk.lorddarthart.newstestapp
 
 import android.accounts.NetworkErrorException
 import android.annotation.SuppressLint
+import android.app.NotificationManager
 import android.content.*
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
@@ -35,6 +36,8 @@ class MainActivity : AppCompatActivity() {
     lateinit var view: View
     private lateinit var netReceiver: ConnectivityChangeReciever
     private var state: Boolean = false
+    private var prevPoz: Int? = null
+    private var notificationManager: NotificationManager? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -185,7 +188,7 @@ class MainActivity : AppCompatActivity() {
         if (intent.getBooleanExtra("checked", false)) {
             recyclerView.post { recyclerView.smoothScrollToPosition(intent.getIntExtra("position", 0)) }
         } else {
-            recyclerView.post { recyclerView.scrollTo(0,2) }
+            //recyclerView.post { recyclerView.scrollTo(0,20) }
         }
     }
 }

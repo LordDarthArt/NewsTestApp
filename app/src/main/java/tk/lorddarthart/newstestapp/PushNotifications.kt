@@ -29,7 +29,7 @@ class PushNotifications {
         lal.putExtra("checked", true)
         lal.putExtra("position", position)
         lal.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-        val lol = PendingIntent.getActivity(context, 0, lal, PendingIntent.FLAG_ONE_SHOT)
+        val lol = PendingIntent.getActivity(context, 0, lal, PendingIntent.FLAG_CANCEL_CURRENT)
         notification.addAction(0, "Open", lol)
         notification.setAutoCancel(true)
         if (Build.VERSION.SDK_INT >= 21) notification.setVibrate(LongArray(0))

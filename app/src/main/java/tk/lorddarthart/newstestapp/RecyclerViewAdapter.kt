@@ -3,18 +3,24 @@ package tk.lorddarthart.newstestapp
 import android.annotation.SuppressLint
 import android.app.NotificationManager
 import android.content.Context
-import android.preference.PreferenceManager
 import android.support.constraint.ConstraintLayout
 import android.support.v7.widget.RecyclerView
+import android.text.Html
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.view.View
-import android.view.animation.Animation
-import android.view.animation.ScaleAnimation
 import android.widget.*
 import com.koushikdutta.ion.Ion
 import java.text.SimpleDateFormat
+import android.widget.CheckBox
+import android.widget.TextView
+import android.widget.CompoundButton
 
+
+
+
+
+@Suppress("DEPRECATION")
 class RecyclerViewAdapter() : RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder>() {
     private lateinit var context: Context
     private lateinit var listItems: List<Item>
@@ -22,6 +28,8 @@ class RecyclerViewAdapter() : RecyclerView.Adapter<RecyclerViewAdapter.ViewHolde
     private lateinit var viewHolder: ViewHolder
     private lateinit var recyclerView: RecyclerView
     private var notificationManager: NotificationManager? = null
+    private var selectedPosition: Int = 0
+    private lateinit var item: Item
 
     constructor(context: Context, listItems: List<Item>, recyclerView: RecyclerView) : this() {
         this.context = context
@@ -40,36 +48,33 @@ class RecyclerViewAdapter() : RecyclerView.Adapter<RecyclerViewAdapter.ViewHolde
     }
 
     @SuppressLint("SimpleDateFormat", "SetTextI18n", "CommitPrefEdits")
-    override fun onBindViewHolder(p0: RecyclerViewAdapter.ViewHolder, p1: Int) {
-        val item = listItems[p1]
-        p0.tvTitle.text = item.info.title
-        p0.tvDesc.text = item.info.rightcol
+    override fun onBindViewHolder(holder: RecyclerViewAdapter.ViewHolder, position: Int) {
+        item = listItems[position]
+        holder.tvTitle.text = item.info.title
+        holder.tvDesc.text = item.info.rightcol
         val sdf = SimpleDateFormat("dd-MM-yyyy HH:mm")
-        p0.tvDate.text = "Добавлено: " + sdf.format(item.info.modified!! * 1000)
-        p0.tvRubric.text = "Рубрика: " + item.rubric.title
+        holder.tvDate.text = "Добавлено: " + sdf.format(item.info.modified!! * 1000)
+        holder.tvRubric.text = "Рубрика: " + item.rubric.title
         Ion.with(context)
             .load(item.title_image!!.url)
             .withBitmap()
             .placeholder(R.drawable.loading)
             .error(R.drawable.no_image_available)
-            .intoImageView(p0.ivNewsPic)
+            .intoImageView(holder.ivNewsPic)
         if (item.title_image!!.credits != "") {
-            p0.tvPicDesc.text = item.title_image!!.credits
+            holder.tvPicDesc.text = Html.fromHtml(item.title_image!!.credits).toString()
         } else {
-            p0.constraintLayout.visibility = View.GONE
+            holder.constraintLayout.visibility = View.GONE
         }
-        p0.checkBox.setOnCheckedChangeListener { _, _ ->
-            if (p0.checkBox.isChecked) {
-                val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context)
-                recyclerView.getChildAt(sharedPrefs.getInt("prevPoz", 0)).findViewById<CheckBox>(R.id.checkBox).isChecked = false
-                PushNotifications().getNotified(context, item.info.title, item.info.rightcol, p1)
-                sharedPrefs.edit().putInt("prevPoz", p1)
-                sharedPrefs.edit().apply()
-            } else {
-                notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-                notificationManager!!.cancel(PushNotifications().uniqueId)
-            }
-        }
+        //in some case, it will prevent unwanted situations;
+        holder.checkBox.setOnCheckedChangeListener(null)
+
+        //if true, your check box will be selected, else unselected
+
+        holder.checkBox.tag = position
+
+        holder.checkBox.isChecked = position == selectedPosition
+        holder.checkBox.setOnCheckedChangeListener(CheckListener(holder.checkBox, position))
     }
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -83,5 +88,42 @@ class RecyclerViewAdapter() : RecyclerView.Adapter<RecyclerViewAdapter.ViewHolde
         var constraintLayout: ConstraintLayout = itemView.findViewById(R.id.darkenBG)
         var checkBox: CheckBox = itemView.findViewById(R.id.checkBox)
 
+    }
+
+    internal inner class CheckListener(private val checkbox: CheckBox, position: Int) :
+        CompoundButton.OnCheckedChangeListener {
+        var data: Item? = null
+        var position: Int = 0
+
+        init {
+            this.position = position
+
+        }
+
+        override fun onCheckedChanged(
+            buttonView: CompoundButton,
+            isChecked: Boolean
+        ) {
+
+            if (isChecked) {
+                checkbox.isChecked = true
+                selectedPosition = position
+                this@RecyclerViewAdapter.notifyDataSetChanged()
+                PushNotifications().getNotified(context, listItems[selectedPosition].info.title, listItems[selectedPosition].info.rightcol, selectedPosition)
+            } else {
+                notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                notificationManager!!.cancel(PushNotifications().uniqueId)
+                checkbox.isChecked = false
+
+            }
+            buttonView.isChecked = isChecked
+
+        }
+
+
+    }
+
+    fun getCheckedItems(): Item {
+        return listItems[selectedPosition]
     }
 }
