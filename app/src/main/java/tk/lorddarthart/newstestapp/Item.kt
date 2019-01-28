@@ -16,7 +16,7 @@ class Item {
     internal var links : Links = Links()
     @SerializedName("rubric")
     @Expose
-    internal var rubric : Rubric = Rubric()
+    internal var rubric : Rubric? = Rubric()
     @SerializedName("tags")
     @Expose
     internal var tags : List<Tags> = LinkedList()

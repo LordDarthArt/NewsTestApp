@@ -50,7 +50,7 @@ class RecyclerViewAdapter() : RecyclerView.Adapter<RecyclerViewAdapter.ViewHolde
         holder.tvDesc.text = item.info.rightcol
         val sdf = SimpleDateFormat("dd-MM-yyyy HH:mm")
         holder.tvDate.text = "Добавлено: " + sdf.format(item.info.modified!! * 1000)
-        holder.tvRubric.text = "Рубрика: " + item.rubric.title
+        holder.tvRubric.text = "Рубрика: " + item.rubric!!.title
         Ion.with(context)
             .load(item.title_image!!.url)
             .withBitmap()

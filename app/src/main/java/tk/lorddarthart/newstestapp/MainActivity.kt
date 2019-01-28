@@ -79,7 +79,7 @@ class MainActivity : AppCompatActivity() {
             item.info.title = cursor.getString(cursor.getColumnIndex(DatabaseHelper.NEWS_TITLE))
             item.info.rightcol = cursor.getString(cursor.getColumnIndex(DatabaseHelper.NEWS_DESC))
             item.info.modified = cursor.getLong(cursor.getColumnIndex(DatabaseHelper.NEWS_DATE))
-            item.rubric.title = cursor.getString(cursor.getColumnIndex(DatabaseHelper.NEWS_RUBRIC))
+            item.rubric?.title = cursor.getString(cursor.getColumnIndex(DatabaseHelper.NEWS_RUBRIC))
             item.title_image!!.url = cursor.getString(cursor.getColumnIndex(DatabaseHelper.NEWS_PIC))
             item.title_image!!.credits = cursor.getString(cursor.getColumnIndex(DatabaseHelper.NEWS_PICDESC))
             news.add(item)
@@ -146,7 +146,7 @@ class MainActivity : AppCompatActivity() {
                                     sqliteDatabase, news.item[i].info.modified,
                                     news.item[i].info.title, news.item[i].info.rightcol,
                                     news.item[i].title_image!!.url, news.item[i].title_image!!.credits,
-                                    news.item[i].rubric.title
+                                    news.item[i].rubric!!.title
                                 )
                             }
                             initializeAdapter(news.item)
