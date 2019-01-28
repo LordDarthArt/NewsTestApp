@@ -16,10 +16,6 @@ import android.widget.CheckBox
 import android.widget.TextView
 import android.widget.CompoundButton
 
-
-
-
-
 @Suppress("DEPRECATION")
 class RecyclerViewAdapter() : RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder>() {
     private lateinit var context: Context
@@ -28,7 +24,7 @@ class RecyclerViewAdapter() : RecyclerView.Adapter<RecyclerViewAdapter.ViewHolde
     private lateinit var viewHolder: ViewHolder
     private lateinit var recyclerView: RecyclerView
     private var notificationManager: NotificationManager? = null
-    private var selectedPosition: Int = 0
+    private var selectedPosition: Int? = null
     private lateinit var item: Item
 
     constructor(context: Context, listItems: List<Item>, recyclerView: RecyclerView) : this() {
@@ -66,13 +62,11 @@ class RecyclerViewAdapter() : RecyclerView.Adapter<RecyclerViewAdapter.ViewHolde
         } else {
             holder.constraintLayout.visibility = View.GONE
         }
-        //in some case, it will prevent unwanted situations;
+        // В некоторых случаях это предотвратит нежелательные ситуации
         holder.checkBox.setOnCheckedChangeListener(null)
 
-        //if true, your check box will be selected, else unselected
-
+        //Если положительно, чекнется, иначе нет
         holder.checkBox.tag = position
-
         holder.checkBox.isChecked = position == selectedPosition
         holder.checkBox.setOnCheckedChangeListener(CheckListener(holder.checkBox, position))
     }
@@ -93,11 +87,10 @@ class RecyclerViewAdapter() : RecyclerView.Adapter<RecyclerViewAdapter.ViewHolde
     internal inner class CheckListener(private val checkbox: CheckBox, position: Int) :
         CompoundButton.OnCheckedChangeListener {
         var data: Item? = null
-        var position: Int = 0
+        var position: Int? = null
 
         init {
             this.position = position
-
         }
 
         override fun onCheckedChanged(
@@ -109,7 +102,7 @@ class RecyclerViewAdapter() : RecyclerView.Adapter<RecyclerViewAdapter.ViewHolde
                 checkbox.isChecked = true
                 selectedPosition = position
                 this@RecyclerViewAdapter.notifyDataSetChanged()
-                PushNotifications().getNotified(context, listItems[selectedPosition].info.title, listItems[selectedPosition].info.rightcol, selectedPosition)
+                PushNotifications().getNotified(context, listItems[selectedPosition!!].info.title, listItems[selectedPosition!!].info.rightcol, selectedPosition!!)
             } else {
                 notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                 notificationManager!!.cancel(PushNotifications().uniqueId)
@@ -124,6 +117,6 @@ class RecyclerViewAdapter() : RecyclerView.Adapter<RecyclerViewAdapter.ViewHolde
     }
 
     fun getCheckedItems(): Item {
-        return listItems[selectedPosition]
+        return listItems[selectedPosition!!]
     }
 }

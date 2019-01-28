@@ -10,7 +10,6 @@ import android.support.v4.app.NotificationCompat
 
 import android.content.Context.NOTIFICATION_SERVICE
 
-
 class PushNotifications {
     private lateinit var notification: NotificationCompat.Builder
     val uniqueId = 45419

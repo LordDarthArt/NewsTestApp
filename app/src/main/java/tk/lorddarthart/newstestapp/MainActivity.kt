@@ -10,7 +10,6 @@ import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.preference.PreferenceManager
 import android.support.design.widget.Snackbar
-import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.View
 import retrofit2.Call
@@ -18,11 +17,7 @@ import retrofit2.Callback
 import retrofit2.Response
 import java.io.IOException
 import java.util.*
-import android.text.TextUtils
 import android.content.Intent
-import android.widget.AbsListView
-import android.widget.CheckBox
-
 
 class MainActivity : AppCompatActivity() {
     private lateinit var databaseHelper: DatabaseHelper
@@ -36,8 +31,6 @@ class MainActivity : AppCompatActivity() {
     lateinit var view: View
     private lateinit var netReceiver: ConnectivityChangeReciever
     private var state: Boolean = false
-    private var prevPoz: Int? = null
-    private var notificationManager: NotificationManager? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,7 +47,7 @@ class MainActivity : AppCompatActivity() {
         linlayoutManager = CenterZoomLayoutManager(this)
         recyclerView.layoutManager = linlayoutManager
         if (sharedPreferences.contains("rubrics")) {
-
+            // TODO: добавить возможность выбора предпочитаемых рубрик
         } else {
             getSomeNews()
         }
@@ -66,8 +59,8 @@ class MainActivity : AppCompatActivity() {
         val netFilter = IntentFilter()
         netFilter.addAction("android.net.conn.CONNECTIVITY_CHANGE")
         val intent = registerReceiver(netReceiver, netFilter)
-        if (intent != null) {
-
+        if (intent!=null) {
+            // Выполнить действие
         }
     }
 
@@ -91,6 +84,7 @@ class MainActivity : AppCompatActivity() {
             item.title_image!!.credits = cursor.getString(cursor.getColumnIndex(DatabaseHelper.NEWS_PICDESC))
             news.add(item)
         }
+        news.sortWith(CompareObjects)
         initializeAdapter(news)
     }
 
@@ -100,6 +94,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     internal inner class ConnectivityChangeReciever : BroadcastReceiver() {
+        // Проверяет доступ к интернету в режиме реального времени
 
         @SuppressLint("UnsafeProtectedBroadcastReceiver")
         override fun onReceive(context: Context, intent: Intent) {
@@ -119,6 +114,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         internal fun checkInternet(): Boolean {
+            // Проверка доступа к интернету
             val runtime = Runtime.getRuntime()
             try {
                 val ipProcess = runtime.exec("/system/bin/ping -c 1 8.8.8.8")
@@ -187,8 +183,11 @@ class MainActivity : AppCompatActivity() {
         // Скролл до нужного элемента
         if (intent.getBooleanExtra("checked", false)) {
             recyclerView.post { recyclerView.smoothScrollToPosition(intent.getIntExtra("position", 0)) }
+            val notificationManager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.cancel(PushNotifications().uniqueId)
+            intent.putExtra("checked", false)
         } else {
-            //recyclerView.post { recyclerView.scrollTo(0,20) }
+            // TODO: активировать CenterZoomToScroll для модификации отображения контента
         }
     }
 }
