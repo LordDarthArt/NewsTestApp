@@ -1,21 +1,21 @@
-package tk.lorddarthart.newstestapp
+package tk.lorddarthart.newstestapp.utils.helper
 
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import tk.lorddarthart.newstestapp.app.model.request.NetworkRequest
 
 class HttpServiceHelper {
-    private lateinit var mInstance: HttpServiceHelper
     private val baseUrl = "https://api.lenta.ru"
-    private var mRetrofit: Retrofit
+    private var retrofit: Retrofit
 
     init {
         val interceptor = HttpLoggingInterceptor()
         interceptor.level = HttpLoggingInterceptor.Level.BODY
         OkHttpClient.Builder()
             .addInterceptor(interceptor)
-        mRetrofit = Retrofit.Builder()
+        retrofit = Retrofit.Builder()
             .baseUrl(baseUrl)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
@@ -25,7 +25,11 @@ class HttpServiceHelper {
         return HttpServiceHelper()
     }
 
-    fun getJSONApi(): JSONPlaceHolderApi {
-        return mRetrofit.create(JSONPlaceHolderApi::class.java)
+    fun getJSONApi(): NetworkRequest {
+        return retrofit.create(NetworkRequest::class.java)
+    }
+
+    companion object {
+        var INSTANCE: HttpServiceHelper? = null
     }
 }

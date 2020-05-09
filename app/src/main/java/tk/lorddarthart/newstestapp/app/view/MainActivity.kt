@@ -1,4 +1,4 @@
-package tk.lorddarthart.newstestapp
+package tk.lorddarthart.newstestapp.app.view
 
 import android.accounts.NetworkErrorException
 import android.annotation.SuppressLint
@@ -6,11 +6,11 @@ import android.app.NotificationManager
 import android.content.*
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.preference.PreferenceManager
-import android.support.design.widget.Snackbar
-import android.support.v7.widget.RecyclerView
+import com.google.android.material.snackbar.Snackbar
+import androidx.recyclerview.widget.RecyclerView
 import android.view.View
 import retrofit2.Call
 import retrofit2.Callback
@@ -18,6 +18,12 @@ import retrofit2.Response
 import java.io.IOException
 import java.util.*
 import android.content.Intent
+import tk.lorddarthart.newstestapp.*
+import tk.lorddarthart.newstestapp.app.model.response.Item
+import tk.lorddarthart.newstestapp.app.model.response.News
+import tk.lorddarthart.newstestapp.app.view.adapter.RecyclerViewAdapter
+import tk.lorddarthart.newstestapp.utils.custom_view.CenterZoomLayoutManager
+import tk.lorddarthart.newstestapp.utils.helper.*
 
 class MainActivity : AppCompatActivity() {
     private lateinit var databaseHelper: DatabaseHelper
@@ -39,12 +45,20 @@ class MainActivity : AppCompatActivity() {
         view = window.decorView.rootView
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(applicationContext)
         databaseHelper =
-            DatabaseHelper(applicationContext, DatabaseHelper.DATABASE_NAME, null, DatabaseHelper.DATABASE_VERSION)
+            DatabaseHelper(
+                applicationContext,
+                DatabaseHelper.DATABASE_NAME,
+                null,
+                DatabaseHelper.DATABASE_VERSION
+            )
         sqliteDatabase = databaseHelper.writableDatabase
         val query: String =
             "SELECT " + DatabaseHelper.NEWS_ID + ", " + DatabaseHelper.NEWS_DATE + ", " + DatabaseHelper.NEWS_TITLE + ", " + DatabaseHelper.NEWS_DESC + ", " + DatabaseHelper.NEWS_RUBRIC + " , " + DatabaseHelper.NEWS_PIC + ", " + DatabaseHelper.NEWS_PICDESC + " FROM " + DatabaseHelper.TABLE_NEWS
         cursor = sqliteDatabase.rawQuery(query, Array(0) { "" })
-        linlayoutManager = CenterZoomLayoutManager(this)
+        linlayoutManager =
+            CenterZoomLayoutManager(
+                this
+            )
         recyclerView.layoutManager = linlayoutManager
         if (sharedPreferences.contains("rubrics")) {
             // TODO: добавить возможность выбора предпочитаемых рубрик
@@ -89,7 +103,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initializeAdapter(news: List<Item>) {
-        recyclerViewAdapter = RecyclerViewAdapter(applicationContext, news, recyclerView)
+        recyclerViewAdapter =
+            RecyclerViewAdapter(
+                applicationContext,
+                news,
+                recyclerView
+            )
         recyclerView.adapter = recyclerViewAdapter
     }
 
@@ -98,7 +117,8 @@ class MainActivity : AppCompatActivity() {
 
         @SuppressLint("UnsafeProtectedBroadcastReceiver")
         override fun onReceive(context: Context, intent: Intent) {
-            val snackBarNotifications = SnackBarNotifications()
+            val snackBarNotifications =
+                SnackBarNotifications()
             if (!checkInternet()) {
                 if (!state) {
                     snackBarNotifications.noInternerConstraintLayout(view)
@@ -143,9 +163,12 @@ class MainActivity : AppCompatActivity() {
                         if (news != null && news.item.isNotEmpty()) {
                             for (i: Int in 0 until news.item.size) {
                                 DatabaseHelper.addNews(
-                                    sqliteDatabase, news.item[i].info.modified,
-                                    news.item[i].info.title, news.item[i].info.rightcol,
-                                    news.item[i].title_image!!.url, news.item[i].title_image!!.credits,
+                                    sqliteDatabase,
+                                    news.item[i].info.modified,
+                                    news.item[i].info.title,
+                                    news.item[i].info.rightcol,
+                                    news.item[i].title_image!!.url,
+                                    news.item[i].title_image!!.credits,
                                     news.item[i].rubric!!.title
                                 )
                             }

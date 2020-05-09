@@ -1,8 +1,8 @@
-package tk.lorddarthart.newstestapp
+package tk.lorddarthart.newstestapp.utils.custom_view
 
 import android.content.Context
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 
 
 class CenterZoomLayoutManager(context: Context) : LinearLayoutManager(context) {

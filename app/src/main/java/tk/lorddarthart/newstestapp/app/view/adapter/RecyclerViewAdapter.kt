@@ -1,10 +1,10 @@
-package tk.lorddarthart.newstestapp
+package tk.lorddarthart.newstestapp.app.view.adapter
 
 import android.annotation.SuppressLint
 import android.app.NotificationManager
 import android.content.Context
-import android.support.constraint.ConstraintLayout
-import android.support.v7.widget.RecyclerView
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.recyclerview.widget.RecyclerView
 import android.text.Html
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -15,6 +15,9 @@ import java.text.SimpleDateFormat
 import android.widget.CheckBox
 import android.widget.TextView
 import android.widget.CompoundButton
+import tk.lorddarthart.newstestapp.R
+import tk.lorddarthart.newstestapp.app.model.response.Item
+import tk.lorddarthart.newstestapp.utils.helper.PushNotifications
 
 @Suppress("DEPRECATION")
 class RecyclerViewAdapter() : RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder>() {
@@ -33,7 +36,7 @@ class RecyclerViewAdapter() : RecyclerView.Adapter<RecyclerViewAdapter.ViewHolde
         this.recyclerView = recyclerView
     }
 
-    override fun onCreateViewHolder(p0: ViewGroup, p1: Int): RecyclerViewAdapter.ViewHolder {
+    override fun onCreateViewHolder(p0: ViewGroup, p1: Int): ViewHolder {
         view = LayoutInflater.from(context).inflate(R.layout.single_item, p0, false)
         viewHolder = ViewHolder(view)
         return viewHolder
@@ -44,7 +47,7 @@ class RecyclerViewAdapter() : RecyclerView.Adapter<RecyclerViewAdapter.ViewHolde
     }
 
     @SuppressLint("SimpleDateFormat", "SetTextI18n", "CommitPrefEdits")
-    override fun onBindViewHolder(holder: RecyclerViewAdapter.ViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         item = listItems[position]
         holder.tvTitle.text = item.info.title
         holder.tvDesc.text = item.info.rightcol

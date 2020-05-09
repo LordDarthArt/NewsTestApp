@@ -1,6 +1,6 @@
-package tk.lorddarthart.newstestapp
+package tk.lorddarthart.newstestapp.utils.helper
 
-import android.support.design.widget.Snackbar
+import com.google.android.material.snackbar.Snackbar
 import android.view.View
 
 class SnackBarNotifications {

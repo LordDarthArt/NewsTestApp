@@ -1,4 +1,4 @@
-package tk.lorddarthart.newstestapp
+package tk.lorddarthart.newstestapp.utils.helper
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -6,9 +6,11 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import android.support.v4.app.NotificationCompat
+import androidx.core.app.NotificationCompat
 
 import android.content.Context.NOTIFICATION_SERVICE
+import tk.lorddarthart.newstestapp.R
+import tk.lorddarthart.newstestapp.app.view.MainActivity
 
 class PushNotifications {
     private lateinit var notification: NotificationCompat.Builder
