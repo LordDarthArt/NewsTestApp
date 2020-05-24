@@ -3,17 +3,15 @@ package tk.lorddarthart.newstestapp.utils.custom_view
 import android.content.Context
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-
+import androidx.recyclerview.widget.RecyclerView.Recycler
 
 class CenterZoomLayoutManager(context: Context) : LinearLayoutManager(context) {
-
     private val mShrinkAmount = 0.2f
     private val mShrinkDistance = 1f
 
-
     override fun scrollVerticallyBy(dy: Int, recycler: RecyclerView.Recycler?, state: RecyclerView.State?): Int {
         val orientation = orientation
-        if (orientation == LinearLayoutManager.VERTICAL) {
+        if (orientation == VERTICAL) {
             val scrolled = super.scrollVerticallyBy(dy, recycler, state)
             val midpoint = height / 2f
             val d0 = 0f
@@ -36,7 +34,7 @@ class CenterZoomLayoutManager(context: Context) : LinearLayoutManager(context) {
 
     override fun scrollHorizontallyBy(dx: Int, recycler: RecyclerView.Recycler?, state: RecyclerView.State?): Int {
         val orientation = orientation
-        if (orientation == LinearLayoutManager.HORIZONTAL) {
+        if (orientation == HORIZONTAL) {
             val scrolled = super.scrollHorizontallyBy(dx, recycler, state)
 
             val midpoint = width / 2f
@@ -56,6 +54,10 @@ class CenterZoomLayoutManager(context: Context) : LinearLayoutManager(context) {
         } else {
             return 0
         }
+    }
 
+    override fun onLayoutChildren(recycler: Recycler?, state: RecyclerView.State?) {
+        super.onLayoutChildren(recycler, state)
+        scrollHorizontallyBy(0, recycler, state)
     }
 }

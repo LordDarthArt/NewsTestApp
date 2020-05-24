@@ -1,50 +1,114 @@
 apply plugin: 'com.android.application'
-
 apply plugin: 'kotlin-android'
-
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion rootProject.target_sdk_version
+    buildToolsVersion rootProject.build_tools_version
+
     defaultConfig {
         applicationId "tk.lorddarthart.newstestapp"
-        minSdkVersion 21
-        targetSdkVersion 28
-        versionCode 1
-        versionName "1.0"
+        minSdkVersion rootProject.min_sdk_version
+        targetSdkVersion rootProject.target_sdk_version
+        versionCode rootProject.version_build
+        versionName "${rootProject.version_major}" +
+                ".${rootProject.version_minor}" +
+                ".${rootProject.version_patch}"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        vectorDrawables.useSupportLibrary = true
+        multiDexEnabled = true
+
     }
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+        debug {
+            versionNameSuffix = "-dev"
+        }
     }
+    applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            outputFileName = "newstestapp-v${versionName}-b${rootProject.version_build}.apk"
+        }
+    }
+    dexOptions {
+        // Prevent OutOfMemory with MultiDex during the build phase
+        javaMaxHeapSize "4g"
+    }
+    dataBinding {
+        enabled = true
+    }
+    compileOptions {
+        sourceCompatibility = 1.8
+        targetCompatibility = 1.8
+    }
+    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+        kotlinOptions {
+            jvmTarget = "1.8"
+        }
+    }
+
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation"org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation 'androidx.appcompat:appcompat:1.0.0'
-    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
-    implementation 'com.google.android.material:material:1.0.0'
-    testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0'
-    implementation 'androidx.recyclerview:recyclerview:1.0.0'
-    implementation 'androidx.cardview:cardview:1.0.0'
-    implementation 'com.google.android.material:material:1.0.0'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
-    //Ion
-    implementation 'com.koushikdutta.ion:ion:2.2.1'
+    // Testing
+    testImplementation "junit:junit:$rootProject.junit_version"
+    androidTestImplementation "androidx.test.ext:junit:$rootProject.android_junit_version"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$rootProject.espresso_version"
+
+    // Android Native Stuff
+    implementation "com.google.android.material:material:$rootProject.material_version"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$rootProject.kotlin_version"
+    implementation "androidx.appcompat:appcompat:$rootProject.appcompat_version"
+    implementation "androidx.core:core-ktx:$rootProject.androidx_core_version"
+    implementation "androidx.legacy:legacy-support-v4:$rootProject.legacy_support_version"
+    implementation "androidx.preference:preference:$rootProject.androidx_preference_version"
+    implementation "androidx.webkit:webkit:$rootProject.webkit_version"
+    implementation "androidx.constraintlayout:constraintlayout:$rootProject.constraint_layout_version"
+    implementation "androidx.recyclerview:recyclerview:$rootProject.recycler_view_version"
+
+    // Glide
+    implementation "com.github.bumptech.glide:glide:$rootProject.glide_version"
+    kapt "com.github.bumptech.glide:compiler:$rootProject.glide_version"
 
     //Retrofit2
-    implementation 'com.squareup.retrofit2:retrofit:2.5.0'
+    implementation "com.squareup.retrofit2:retrofit:$rootProject.retrofit_version"
+    implementation "com.squareup.retrofit2:converter-gson:$rootProject.retrofit_version"
 
-    //Gson
-    implementation 'com.squareup.retrofit2:converter-gson:2.5.0'
+    //OkHttp
+    implementation "com.squareup.okhttp3:okhttp:$rootProject.ok_http_version"
+    implementation "com.squareup.okhttp3:logging-interceptor:$rootProject.ok_http_version"
 
-    //OkHTTP3
-    implementation 'com.squareup.okhttp3:logging-interceptor:3.8.0'
-    implementation 'androidx.recyclerview:recyclerview:1.0.0'
+    // DataBinding Library
+    kapt "com.android.databinding:compiler:$rootProject.databinding_library_version"
+
+    // Room
+    implementation "androidx.room:room-runtime:$rootProject.room_version"
+    implementation "androidx.room:room-ktx:$rootProject.room_version"
+    testImplementation "androidx.room:room-testing:$rootProject.room_version"
+    kapt "androidx.room:room-compiler:$rootProject.room_version"
+
+    // Moxy
+    implementation "tech.schoolhelper:moxy-x:$rootProject.moxy_x_version"
+    implementation "tech.schoolhelper:moxy-x-android:$rootProject.moxy_x_version"
+    implementation "tech.schoolhelper:moxy-x-androidx:$rootProject.moxy_x_version"
+    kapt "tech.schoolhelper:moxy-x-compiler:$rootProject.moxy_x_version"
+
+    // Rx
+    implementation "io.reactivex.rxjava3:rxjava:$rootProject.rx_version"
+    implementation "io.reactivex.rxjava3:rxandroid:$rootProject.rx_android_version"
+
+    // Dagger
+    implementation "com.google.dagger:dagger:$rootProject.dagger_version"
+    implementation "com.google.dagger:dagger-android:$rootProject.dagger_version"
+    implementation "com.google.dagger:dagger-android-support:$rootProject.dagger_version"
+    kapt "com.google.dagger:dagger-compiler:$rootProject.dagger_version"
+    kapt "com.google.dagger:dagger-android-processor:$rootProject.dagger_version"
 }

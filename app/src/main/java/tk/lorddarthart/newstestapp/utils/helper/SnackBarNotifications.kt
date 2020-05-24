@@ -4,7 +4,6 @@ import com.google.android.material.snackbar.Snackbar
 import android.view.View
 
 class SnackBarNotifications {
-
     fun noInternerConstraintLayout(view: View) {
         val myAwesomeSnackbar = Snackbar.make(
             view,

@@ -7,5 +7,5 @@ import tk.lorddarthart.newstestapp.app.model.response.Item
 class News {
     @SerializedName("headlines")
     @Expose
-    internal lateinit var item: List<Item>
+    val item: List<Item>? = null
 }

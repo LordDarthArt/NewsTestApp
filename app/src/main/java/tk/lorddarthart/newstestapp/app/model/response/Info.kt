@@ -6,14 +6,14 @@ import com.google.gson.annotations.SerializedName
 class Info {
     @SerializedName("id")
     @Expose
-    internal lateinit var id: String
+    val id: String? = null
     @SerializedName("title")
     @Expose
-    internal lateinit var title: String
+    val title: String? = null
     @SerializedName("rightcol")
     @Expose
-    internal lateinit var rightcol: String
+    val rightcol: String? = null
     @SerializedName("modified")
     @Expose
-    internal var modified: Long? = null
+    val modified: Long? = null
 }

@@ -5,31 +5,26 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import tk.lorddarthart.newstestapp.app.model.request.NetworkRequest
+import tk.lorddarthart.newstestapp.utils.static_collections.Strings
+import java.util.concurrent.TimeUnit
 
-class HttpServiceHelper {
-    private val baseUrl = "https://api.lenta.ru"
-    private var retrofit: Retrofit
+object HttpServiceHelper {
+    private val interceptor = HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY }
 
-    init {
-        val interceptor = HttpLoggingInterceptor()
-        interceptor.level = HttpLoggingInterceptor.Level.BODY
-        OkHttpClient.Builder()
-            .addInterceptor(interceptor)
-        retrofit = Retrofit.Builder()
-            .baseUrl(baseUrl)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-    }
+    private var okHttpClient = OkHttpClient.Builder()
+        .addInterceptor(interceptor)
+        .callTimeout(20, TimeUnit.SECONDS)
+        .connectTimeout(10, TimeUnit.SECONDS)
+        .build()
 
-    fun getInstance(): HttpServiceHelper {
-        return HttpServiceHelper()
-    }
+    private val retrofit = Retrofit.Builder()
+        .baseUrl(Strings.NEWS_BASE_URL)
+        .client(okHttpClient)
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
 
-    fun getJSONApi(): NetworkRequest {
-        return retrofit.create(NetworkRequest::class.java)
-    }
-
-    companion object {
-        var INSTANCE: HttpServiceHelper? = null
-    }
+    val jsonApi: NetworkRequest
+        get() {
+            return retrofit.create(NetworkRequest::class.java)
+        }
 }
